@@ -1,0 +1,10 @@
+item-section-example1-head-text =
+    .label = Zotero-RAG: 条目信息
+item-section-example1-sidenav-tooltip =
+    .tooltiptext = 这是Zotero-RAG面板
+item-section-example2-head-text =
+    .label = Zotero-RAG: 阅读器[{$status}]
+item-section-example2-sidenav-tooltip =
+    .tooltiptext = 这是Zotero-RAG面板(阅读器)
+item-section-example2-button-tooltip =
+    .tooltiptext = 移除此面板

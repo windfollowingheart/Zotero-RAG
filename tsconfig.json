@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "target": "ES2018",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": [
+    "src/**/*",
+    "typings",
+    "node_modules/zotero-types",
+    "node_modules/pdfjs-dist",
+    "src/pdf/pdf1.d.ts"
+  ],
+  "exclude": [
+    "build",
+    "addon"
+  ]
+}
