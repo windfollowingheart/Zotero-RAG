@@ -3,7 +3,7 @@ import { DialogHelper } from "zotero-plugin-toolkit/dist/helpers/dialog";
 import hooks from "./hooks";
 import { createZToolkit } from "./utils/ztoolkit";
 import { getRag } from "./rag/rag";
-import { LightRAG } from "lightrag-js";
+import { createLightRAGUI, LightRAG, lightRAGUI } from "lightrag-js";
 import { createMainContainerUi } from "./utils/ui";
 
 
@@ -23,7 +23,11 @@ class Addon {
     };
     dialog?: DialogHelper;
     lightRag?: LightRAG;
-    lightRagUi?: HTMLDivElement;
+    // lightRagUi?: HTMLDivElement;
+    lightRagUi?: lightRAGUI;
+    zoteroRagButtonDialog?: DialogHelper;
+    zoteroRagChatDialog?: DialogHelper;
+    zoteroRagChatDialogWindowOriginalClose?: any;
   };
   // Lifecycle hooks
   public hooks: typeof hooks;
@@ -38,9 +42,10 @@ class Addon {
     };
     this.hooks = hooks;
     this.api = {};
-    getRag().then(rag=>{
-      this.data.lightRag = rag
-    })
+    // getRag().then(rag=>{
+    //   this.data.lightRag = rag
+    // })
+    // this.data.lightRagUi = createLightRAGUI()
     // const mainContainer = createMainContainerUi()
     // this.data.lightRagUi = mainContainer
   }

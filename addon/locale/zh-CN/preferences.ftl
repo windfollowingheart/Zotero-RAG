@@ -5,3 +5,5 @@ pref-llm-model = 语言模型名称
 pref-embedding-url = embedding模型url地址
 pref-embedding-apikey = embedding模型apikey
 pref-embedding-model = embedding模型名称
+
+pref-miner-apiToken = miner-pdf解析apitoken

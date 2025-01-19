@@ -1,8 +1,8 @@
 startup-begin = 插件加载中
 startup-finish = 插件已就绪
-menuitem-label = Zotero-RAG: 帮助工具样例
+menuitem-label = Zotero-RAG: 工具菜单
 menupopup-label = Zotero-RAG: 弹出菜单
-menuitem-submenulabel = Zotero-RAG
+menuitem-submenulabel = Zotero-RAG: 解析所选条目
 menuitem-filemenulabel = Zotero-RAG: 文件菜单
 prefs-title = Zotero-RAG插件配置
 prefs-table-title = 标题

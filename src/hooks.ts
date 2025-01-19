@@ -10,6 +10,7 @@ import { getString, initLocale } from "./utils/locale";
 import { registerPrefsScripts } from "./modules/preferenceScript";
 import { createZToolkit } from "./utils/ztoolkit";
 import { createMainContainerUi } from "./utils/ui";
+import { registerLightRag, registerLightRagUi, registerZoteroRagButtonContainer } from "./utils/items";
 
 
 
@@ -27,14 +28,15 @@ async function onStartup() {
 
   BasicExampleFactory.registerNotifier();
 
-  KeyExampleFactory.registerShortcuts();
+  // KeyExampleFactory.registerShortcuts();
+  KeyExampleFactory.registerZoteroRagMenuShowShortCuts();
 
   await UIExampleFactory.registerExtraColumn();
 
   await UIExampleFactory.registerExtraColumnWithCustomCell();
 
   // UIExampleFactory.registerTestTab();
-  UIExampleFactory.registerItemPaneSection();
+  // UIExampleFactory.registerItemPaneSection();
 
   // UIExampleFactory.registerReaderItemPaneSection();
 
@@ -50,16 +52,27 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   // @ts-ignore This is a moz feature
   win.MozXULElement.insertFTLIfNeeded(`${config.addonRef}-mainWindow.ftl`);
 
-  const mainContainer = createMainContainerUi()
-  addon.data.lightRagUi = mainContainer
+  // const mainContainer = createMainContainerUi()
+  // addon.data.lightRagUi = mainContainer
 
   UIExampleFactory.registerStyleSheet(win);
 
   UIExampleFactory.registerRightClickMenuItem();
 
-  UIExampleFactory.registerRightClickMenuPopup(win);
+  // UIExampleFactory.registerRightClickMenuPopup(win);
 
   UIExampleFactory.registerWindowMenuWithSeparator();
+
+  // 注册lightRag和lightRagUi
+  // UIExampleFactory.registerLightRag();
+  // UIExampleFactory.registerLightRagUi();
+  setTimeout(()=>{
+    registerLightRag()
+    registerLightRagUi()
+  }, 1000)
+  
+  // UIExampleFactory.registerZoteroRagButtonContainer();
+  registerZoteroRagButtonContainer()
 
   PromptExampleFactory.registerNormalCommandExample();
 
@@ -90,6 +103,14 @@ function onShutdown(): void {
   addon.data.dialog?.window?.close();
   addon.data.alive = false;
   delete Zotero[config.addonInstance];
+
+  if (addon.data.zoteroRagButtonDialog && addon.data.zoteroRagChatDialog) {
+    addon.data.zoteroRagButtonDialog.window.close()
+
+    // addon.data.zoteroRagChatDialog.window.close = addon.data.zoteroRagChatDialogWindowOriginalClose
+    addon.data.zoteroRagChatDialog?.window.close()
+    addon.data.lightRagUi?.insertTaskListContainerDiv?.remove()
+  }
 }
 
 /**

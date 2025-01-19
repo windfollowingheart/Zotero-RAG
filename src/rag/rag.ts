@@ -89,6 +89,7 @@ function setNewEmbeddingInfoFunc(){
 }   
 
 async function getRag() {
+    // ztoolkit.getGlobal("alert")("999999999999")
     const rag = await (createLightRAG(
         {
             workingDir: lightRagConfig['RAG_DIR'],

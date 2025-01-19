@@ -1,8 +1,10 @@
 import { config } from "../../package.json";
 import { getLocaleID, getString } from "../utils/locale";
 import { getPref, setPref, clearPref } from "../utils/prefs"
-import { createAgentChatBox, createUserChatBox, sendQueryMessage, vaildUserInputValidity } from "../utils/chat";
+import { createAgentChatBox, createUserChatBox, query, sendQueryMessage, vaildUserInputValidity } from "../utils/chat";
 import { createMainContainerUi } from "../utils/ui";
+import { createLightRAG, createLightRAGUI } from "lightrag-js";
+import { lightRagChatQuery, ragItems } from "../utils/items";
 // importScripts(`chrome://${config.addonRef}/content/pdf.min.js`)
 
 
@@ -128,6 +130,26 @@ export class KeyExampleFactory {
       })
       .show();
   }
+
+  static registerZoteroRagMenuShowShortCuts() {
+    // Register an event key for Alt+L
+    ztoolkit.Keyboard.register((ev, keyOptions) => {
+      console.log(ev, keyOptions.keyboard);
+      if (keyOptions.keyboard?.equals("alt,l")) {
+        console.log("Show ZoteroRagButtonContainer", addon.data.zoteroRagButtonDialog)
+        // if(addon.data.zoteroRagButtonDialog){
+        //   addon.data.zoteroRagButtonDialog.window.open()
+        //   return
+        // }
+        addon.data.zoteroRagButtonDialog?.window.close()
+        // addon.data.zoteroRagButtonDialog?.window.focus()
+        UIExampleFactory.registerZoteroRagButtonContainer();
+      }
+    });
+    
+  }
+
+  
 }
 
 export class UIExampleFactory {
@@ -151,11 +173,31 @@ export class UIExampleFactory {
     const menuIcon = `chrome://${config.addonRef}/content/icons/favicon.png`;
     // item menuitem with icon
     ztoolkit.Menu.register("item", {
-      tag: "menuitem",
+      // tag: "menuitem",
+      tag: "menu",
       id: "zotero-itemmenu-addontemplate-test",
       label: getString("menuitem-label"),
-      commandListener: (ev) => addon.hooks.onDialogEvents("dialogExample"),
+      // commandListener: (ev) => addon.hooks.onDialogEvents("dialogExample"),
+      // commandListener: (ev) => {
+      //   // addon.hooks.onDialogEvents("dialogExample")
+      //   ragItems()
+      // },
       icon: menuIcon,
+      children: [
+        {
+          tag: "menuitem",
+          label: getString("menuitem-submenulabel"),
+          commandListener: (ev) => {
+            // addon.hooks.onDialogEvents("dialogExample")
+            ragItems()
+          },
+        },
+        // {
+        //   tag: "menuitem",
+        //   label: getString("menuitem-submenulabel"),
+        //   oncommand: "alert('Hello World! Sub Menuitem.')",
+        // },
+      ],
     });
   }
 
@@ -174,6 +216,7 @@ export class UIExampleFactory {
           },
         ],
       },
+      
       "before",
       win.document.querySelector(
         "#zotero-itemmenu-addontemplate-test",
@@ -301,32 +344,8 @@ export class UIExampleFactory {
 
       },
       onItemChange: ({ item, setEnabled, tabType,body }) => {
-        // setEnabled(tabType === "reader");
-        const mainContainer = addon.data.lightRagUi
-        if(mainContainer){
-          const ragInsertContainer  =mainContainer.querySelector(".rag-insert-container") as HTMLDivElement
-          const displayAreaContainer  =mainContainer.querySelector(".display-area-container") as HTMLDivElement
-          const userInputAreaContainer  =mainContainer.querySelector(".user-input-area-container") as HTMLDivElement
-          if(tabType === "reader"){
-            ragInsertContainer.style.display = "none"
-            displayAreaContainer.style.display = "flex"
-            userInputAreaContainer.style.display = "flex"
-          }else{
-            ragInsertContainer.style.display = "flex"
-            displayAreaContainer.style.display = "none"
-            userInputAreaContainer.style.display = "none"
-          }
-          body.appendChild(mainContainer)
-        }
-        const aa = body.parentElement?.parentElement?.parentElement as HTMLDivElement
-        setTimeout(() => {
-          console.log(aa.scrollTop, aa.scrollHeight)
-          aa.scrollTo({
-            top: aa.scrollHeight, // 滚动到元素的底部
-            behavior: 'smooth' // 平滑滚动
-          });
-        }, 200)
-        return true;
+        
+        
       },
     });
   }
@@ -439,6 +458,255 @@ export class UIExampleFactory {
         },
       ],
     });
+  }
+
+
+  static async registerLightRag(){
+    const rag = await createLightRAG()
+    addon.data.lightRag = rag
+  }
+
+  static  registerLightRagUi(){
+    const lightRagUi =  createLightRAGUI()
+    addon.data.lightRagUi = lightRagUi
+  }
+
+  static registerZoteroRagButtonContainer() {
+    const maxTimes = 100
+    
+    const dialogHelper = new ztoolkit.Dialog(1, 1)
+      .addCell(0, 0, {
+        tag: "div",
+        styles: {
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          justifyContent: "space-evenly",
+          cursor: "pointer",
+          userSelect: "none",
+        },
+        children:[
+          {
+            tag: "div",
+            classList: ["zotero-rag-insert-task-list-container-show-button-div"],
+            styles: {
+              backgroundColor:"rgb(190, 211, 214)",
+              borderRadius: "5px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "5px"
+            },
+            properties: {
+              innerHTML: "文档解析"
+            },
+            listeners: [
+              {
+                  type: "click",
+                  listener: () => {
+                    // ztoolkit.getGlobal("alert")("Command triggered1!")
+                    if(!addon.data.lightRagUi){
+                      return
+                    }
+                    const insertTaskListContainerDiv = addon.data.lightRagUi.createInsertTaskListContainerDiv(document) as HTMLDivElement
+                    // console.log(document)
+                    Zotero.getMainWindow().document.documentElement.appendChild(insertTaskListContainerDiv)
+                  }
+              }
+            ]
+          },
+          {
+            tag: "div",
+            classList: ["zotero-rag-chat-container-show-button-div"],
+            styles: {
+              backgroundColor:"rgb(190, 211, 214)",
+              borderRadius: "5px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "5px"
+            },
+            properties: {
+              innerHTML: "聊天界面",
+            },
+            listeners: [
+              {
+                  type: "click",
+                  listener: () => {
+                    // ztoolkit.getGlobal("alert")("Command triggered2!")
+                    if(!addon.data.lightRagUi){
+                      return
+                    }
+                    const dialogChat = new ztoolkit.Dialog(1,1)
+                    .addCell(0, 0, {
+                      tag: "div",
+                      classList: ["zotero-rag-chat-container-1-div"],
+                      styles: {
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        backgroundColor: "white",
+                      },
+                    })
+                    .open("Zotero-RAG 聊天界面", 
+                      {
+                        width: 800,
+                        height: 500,
+                        resizable: true,
+                        centerscreen: true,
+                      }
+                    )
+                    const container1 = ztoolkit.UI.createElement(dialogChat.window.document, "div", {
+                      styles: {
+                        width: "100%",
+                        height: "100%",
+                        backgroundColor: "rgb(97, 213, 231)",
+                      },
+                    })
+                    // dialogChat.window.document.body.innerHTML = '<html id="hhh"></html>'
+                    setTimeout(()=>{
+                      if(!addon.data.lightRagUi){
+                        return
+                      }
+                      const hhh = dialogChat.window.document.querySelector(".zotero-rag-chat-container-1-div")
+                      const hhh1 = dialogChat.window.document.documentElement.querySelector(".zotero-rag-chat-container-1-div")
+                      console.log("hhh",hhh)
+                      console.log("hhh1",hhh1)
+                      console.log("dialogChat",dialogChat.window)
+                      // hhh?.appendChild(container1)
+                      const chatMainContainerDiv = addon.data.lightRagUi.createchatMainContainerDiv(dialogChat.window.document)
+                      // dialogChat.window.document.documentElement.appendChild((addon.data.lightRagUi.chatMainContainerDiv) as HTMLDivElement)
+                      hhh?.appendChild((addon.data.lightRagUi.chatMainContainerDiv) as HTMLDivElement)
+                      // console.log("dialogChat.window.document.body",dialogChat.window.document)
+                      // console.log("dialogChat.window.document.documentElement",dialogChat.window.document.documentElement)
+                      
+                      addon.data.lightRagUi.sendMessageCallBackFunc = lightRagChatQuery
+                    },500)
+                    dialogChat.window.document.body.style.width = "100%"
+                    dialogChat.window.document.body.style.height = "100%"
+                    console.log("dialogChat",dialogChat.window)
+                    console.log("dialogChat.window.document",dialogChat.window.document)
+                    console.log("dialogChat.window.body",dialogChat.window.innerWidth)
+                    console.log("dialogChat.window.body",dialogChat.window.innerHeight)
+                    console.log("dialogChat.window.body",dialogChat.window.document.body.style.width)
+                    // const chatMainContainerDiv = addon.data.lightRagUi.createchatMainContainerDiv(dialogChat.window.document)
+                    // // dialogChat.window.document.documentElement.appendChild((addon.data.lightRagUi.chatMainContainerDiv) as HTMLDivElement)
+                    // dialogChat.window.document.body.appendChild((addon.data.lightRagUi.chatMainContainerDiv) as HTMLDivElement)
+                    // console.log("dialogChat.window.document.body",dialogChat.window.document)
+                    // console.log("dialogChat.window.document.documentElement",dialogChat.window.document.documentElement)
+                    
+                    // addon.data.lightRagUi.sendMessageCallBackFunc = query
+                  }
+              }
+            ]
+          }
+        ]
+        
+      })
+      // .addCell(0, 1, {
+      //   tag: "div",
+      //   properties: { 
+      //     innerHTML: `<div class="zotero-rag-chat-container-show-button-div">
+      //       聊天界面
+      //     </div>`
+      //   },
+      // })
+      .open("Zotero-RAG 功能菜单", {
+        width: 200,
+        height: 50,
+        resizable: false,
+        // left: win.screenLeft + 30,
+        // top: win.screenTop + 30,
+        centerscreen: true,
+        // alwaysRaised: true
+      })
+    
+    addon.data.zoteroRagButtonDialog = dialogHelper
+    // const doc1 = dialogHelper.window.document
+    
+    // setTimeout(()=>{
+    //   console.log("000000000000000000000")
+    //   console.log(doc1.body.innerHTML)
+    // },1000)
+    // const insertShowButtonDiv = doc1.querySelector(".zotero-rag-insert-task-list-container-show-button-div")
+    // const chatShowButtonDiv = doc1.querySelector(".zotero-rag-chat-container-show-button-div")
+    // ztoolkit.getGlobal("alert")(insertShowButtonDiv)
+    // insertShowButtonDiv?.addEventListener("click", ()=>{
+    //   ztoolkit.getGlobal("alert")("Command triggered1!")
+    // })
+    // chatShowButtonDiv?.addEventListener("click", ()=>{
+    //   ztoolkit.getGlobal("alert")("Command triggered2!")
+    // })
+  }
+
+  static registerZoteroRagButtonContainer2(win: Window) {
+    
+    const div1 = ztoolkit.UI.createElement(win.document, "div", {
+      styles: {
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        cursor: "pointer",
+        userSelect: "none",
+      },
+      children:[
+        {
+          tag: "div",
+          classList: ["zotero-rag-insert-task-list-container-show-button-div"],
+          styles: {
+            backgroundColor:"rgb(190, 211, 214)",
+            borderRadius: "5px",
+            padding: "5px"
+          },
+          properties: {
+            innerHTML: "文档解析"
+          }
+        },
+        {
+          tag: "div",
+          classList: ["zotero-rag-chat-container-show-button-div"],
+          styles: {
+            backgroundColor:"rgb(190, 211, 214)",
+            borderRadius: "5px",
+            padding: "5px"
+          },
+          properties: {
+            innerHTML: "聊天界面",
+          }
+        }
+      ]
+    })
+    
+    const dialogHelper = new ztoolkit.Dialog(1, 1)
+      .open("Zotero-RAG 功能菜单", {
+        width: 200,
+        height: 50,
+        resizable: false,
+        // left: win.screenLeft + 30,
+        // top: win.screenTop + 30,
+        centerscreen: true,
+      })
+    
+    
+    addon.data.zoteroRagButtonDialog = dialogHelper
+    const doc1 = dialogHelper.window.document
+    
+    setTimeout(()=>{
+      dialogHelper.window.document.body.appendChild(div1)
+      console.log("000000000000000000000")
+      console.log(doc1.body.innerHTML)
+      const insertShowButtonDiv = doc1.querySelector(".zotero-rag-insert-task-list-container-show-button-div")
+      const chatShowButtonDiv = doc1.querySelector(".zotero-rag-chat-container-show-button-div")
+      insertShowButtonDiv?.addEventListener("click", ()=>{
+        ztoolkit.getGlobal("alert")("Command triggered1!")
+      })
+      chatShowButtonDiv?.addEventListener("click", ()=>{
+        ztoolkit.getGlobal("alert")("Command triggered2!")
+      })
+    },100)
+    
   }
 }
 
