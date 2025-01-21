@@ -9,7 +9,7 @@ import { config } from "../package.json";
 import { getString, initLocale } from "./utils/locale";
 import { registerPrefsScripts } from "./modules/preferenceScript";
 import { createZToolkit } from "./utils/ztoolkit";
-import { createMainContainerUi } from "./utils/ui";
+import { createMainContainerUi, createTestUi } from "./utils/ui";
 import { registerLightRag, registerLightRagUi, registerZoteroRagButtonContainer } from "./utils/items";
 
 
@@ -69,6 +69,7 @@ async function onMainWindowLoad(win: Window): Promise<void> {
   setTimeout(()=>{
     registerLightRag()
     registerLightRagUi()
+    // createTestUi()
   }, 1000)
   
   // UIExampleFactory.registerZoteroRagButtonContainer();
@@ -104,8 +105,9 @@ function onShutdown(): void {
   addon.data.alive = false;
   delete Zotero[config.addonInstance];
 
-  if (addon.data.zoteroRagButtonDialog && addon.data.zoteroRagChatDialog) {
-    addon.data.zoteroRagButtonDialog.window.close()
+  if (true || addon.data.zoteroRagButtonDialog && addon.data.zoteroRagChatDialog) {
+    console.log("关闭应用程序时执行")
+    addon.data.zoteroRagButtonDialog?.window.close()
 
     // addon.data.zoteroRagChatDialog.window.close = addon.data.zoteroRagChatDialogWindowOriginalClose
     addon.data.zoteroRagChatDialog?.window.close()

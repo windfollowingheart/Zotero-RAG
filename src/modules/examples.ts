@@ -2,7 +2,7 @@ import { config } from "../../package.json";
 import { getLocaleID, getString } from "../utils/locale";
 import { getPref, setPref, clearPref } from "../utils/prefs"
 import { createAgentChatBox, createUserChatBox, query, sendQueryMessage, vaildUserInputValidity } from "../utils/chat";
-import { createMainContainerUi } from "../utils/ui";
+import { createMainContainerUi, createTestUi } from "../utils/ui";
 import { createLightRAG, createLightRAGUI } from "lightrag-js";
 import { lightRagChatQuery, ragItems } from "../utils/items";
 // importScripts(`chrome://${config.addonRef}/content/pdf.min.js`)
@@ -320,6 +320,7 @@ export class UIExampleFactory {
       },
       bodyXHTML: `<html:h1 id="test"></html:h1>`,
       onRender: (props) => {
+        createTestUi()
         // body.textContent = JSON.stringify({
         //   id: item?.id,
         //   editable,

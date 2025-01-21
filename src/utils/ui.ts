@@ -310,6 +310,34 @@ function createMainContainerUi(){
     return mainContainer
 }
 
+function createTestUi(){
+  const nav = document.querySelectorAll("#zotero-context-pane-sidenav")
+  if(nav.length!==1){
+    console.log("nav not found")
+    return
+  }
+  console.log("nav@@",nav)
+  const navContainer = nav[0] as HTMLElement
+  console.log("navContainer",navContainer)
+  const relativeContainer = ztoolkit.UI.createElement(document, "div", {
+    namespace: "html",
+    classList: ['nav-sidebar-menu-container-div']
+  })
+  console.log("relativeContainer",relativeContainer)
+  navContainer.append(relativeContainer)
+
+  ztoolkit.UI.appendElement({
+    tag: "link",
+    id: `${config.addonRef} -link`,
+    properties: {
+      type: "text/css",
+      rel: "stylesheet",
+      href: `chrome://${config.addonRef}/content/main.css`
+    }
+  }, relativeContainer)
+}
+
 export {
-  createMainContainerUi
+  createMainContainerUi,
+  createTestUi
 }

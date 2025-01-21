@@ -1,0 +1,19 @@
+.nav-sidebar-menu-container-div {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    width: 10px;
+    height: 200px;
+    background-color: #cc5f5f;
+    left: -0px;
+    top: 0px;
+    border-radius: 5px 0 0 5px;
+    border: 1px solid #DEDEDE;
+    box-shadow: -2px 2px 3px rgba(0, 0, 0, 0.1);
+    border-right-width: 0px;
+    transition: transform 0.5s ease, width 0.5s ease;
+    transform: translateX(0px);
+
+}
